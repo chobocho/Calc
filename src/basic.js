@@ -96,7 +96,6 @@ function Evaluate(args)
 
         switch(tokenType) {
             case TOKEN_PLUS:
-                 TRACE("PLUS");
                  opeator = TOKEN_PLUS;
                  break;
             case TOKEN_MINUS:
@@ -126,7 +125,6 @@ function Evaluate(args)
                         while (stack.length >= 2) {
                             tempValue += parseInt(stack.pop());
                         };
-                        TRACE(tempValue);
                         tempValue = parseInt(stack.pop()) - tempValue;
                         break;   
                     case TOKEN_MULTI:
