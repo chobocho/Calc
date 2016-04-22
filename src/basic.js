@@ -8,7 +8,7 @@
  *  Global variables
  *-----------------------------------------------*/
 var DEBUG_PRINT = false;  // Debug Mode Option
-var TRACE_PRINT = false;  // Trace Mode Option
+var TRACE_PRINT = true;  // Trace Mode Option
  
  
 // Type of Token
@@ -24,7 +24,7 @@ var TOKEN_LPAREN	= 7;//   (
 var TOKEN_RPAREN	= 8;//   )
 var TOKEN_PLUS		= 9;//   +
 var TOKEN_MINUS		= 10;//  -
-var TOKEN_TIMES		= 11;//  *
+var TOKEN_MULTI		= 11;//  *
 var TOKEN_DIVIDE	= 12;//  /
 
 var TOKEN_COMMENT   = 13;//  #
@@ -35,7 +35,10 @@ var TOKEN_EOE       = 17;
 
 var TOKEN_EOL_KW     = ';';
 var TOKEN_COMMENT_KW = '#';
+var TOKEN_PLUS_KW    = '+';
 var TOKEN_MINUS_KW   = '-';
+var TOKEN_MULTI_KW   = '*';
+
 // Type of Error
 var SYNTAX            = 100;
 var UNBALANCED_PARENS = 101;
@@ -85,12 +88,23 @@ function Evaluate(args)
     IsOccuredError = false;
     tokenType = TOKEN_NONE;
     gToken = TOKEN_NONE;
+    var IsLineStart = true; 
+    var opeator = TOKEN_NONE;
     
     while(tokenType != TOKEN_EOE) {
         getToken();
-        
+
         switch(tokenType) {
-            case TOKEN_DELIMITER:
+            case TOKEN_PLUS:
+                 TRACE("PLUS");
+                 opeator = TOKEN_PLUS;
+                 break;
+            case TOKEN_MINUS:
+                 opeator = TOKEN_MINUS;
+                 break;
+            case TOKEN_MULTI:
+                 opeator = TOKEN_MULTI;
+                 tempValue = 1;
                 break;
             case TOKEN_VARIABLE:
                 break;
@@ -101,11 +115,29 @@ function Evaluate(args)
                 if (stack.length <= 0) break;
                 /* fall through */
             case TOKEN_EOL:
-                while (stack.length > 0) {
-                    tempValue += parseInt(stack.pop());
-                };
+                switch(opeator) {
+                    case TOKEN_NONE:
+                    case TOKEN_PLUS:
+                        while (stack.length > 0) {
+                            tempValue += parseInt(stack.pop());
+                        };
+                        break;
+                    case TOKEN_MINUS:
+                        while (stack.length >= 2) {
+                            tempValue += parseInt(stack.pop());
+                        };
+                        TRACE(tempValue);
+                        tempValue = parseInt(stack.pop()) - tempValue;
+                        break;   
+                    case TOKEN_MULTI:
+                        while (stack.length > 0) {
+                            tempValue *= parseInt(stack.pop());
+                        };
+                        break;
+                }
                 result += tempValue + "\n";
                 tempValue = 0;
+                IsLineStart = true;
                 break;                
             default:
                 break;
@@ -163,8 +195,21 @@ function getToken()
                     tokenType = TOKEN_EOL;
                     break;
                 case TOKEN_COMMENT_KW:
+                    ++source_idx;
                     tokenType = TOKEN_COMMENT;
                     break;
+                case TOKEN_PLUS_KW:
+                    ++source_idx;
+                    tokenType = TOKEN_PLUS;
+                    break;
+                case TOKEN_MINUS_KW:
+                    ++source_idx;
+                    tokenType = TOKEN_MINUS;
+                    break;
+                case TOKEN_MULTI_KW:
+                    ++source_idx;
+                    tokenType = TOKEN_MULTI;  
+                    break;                    
                 default:
                     break;   
             }
@@ -222,7 +267,7 @@ function TRACE (str)
 {
     if (TRACE_PRINT == true)
     {
-	    alert(str);    
+	    console.log(str);    
     }	
 }
 
