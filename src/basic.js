@@ -8,7 +8,7 @@
  *  Global variables
  *-----------------------------------------------*/
 var DEBUG_PRINT = false;  // Debug Mode Option
-var TRACE_PRINT = true;   // Trace Mode Option
+var TRACE_PRINT = false;  // Trace Mode Option
  
  
 // Type of Token
@@ -91,10 +91,8 @@ function Evaluate(args)
         
         switch(tokenType) {
             case TOKEN_DELIMITER:
-                trace("DE " + TOKEN_DELIMITER);
                 break;
             case TOKEN_VARIABLE:
-                trace("VA " + TOKEN_VARIABLE);
                 break;
             case TOKEN_NUMBER:
                 stack.push(gToken);
