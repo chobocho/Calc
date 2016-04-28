@@ -13,31 +13,34 @@ var TRACE_PRINT = true;  // Trace Mode Option
  
 // Type of Token
 var TOKEN_NONE   	= 0;
-var TOKEN_DELIMITER	= 1; 
-var TOKEN_VARIABLE 	= 2; //   [a-zA-Z]+[a-zA-Z0-9]*
-var TOKEN_NUMBER	= 3; //   [0-9]+
+var TOKEN_PLUS		= 1; // +
+var TOKEN_MINUS		= 2; // -
+var TOKEN_MULTI		= 3; // *
+var TOKEN_VARIABLE 	= 4; // @[a-zA-Z0-9]*
+var TOKEN_NUMBER	= 5; // [0-9]+
+var TOKEN_ASSIGN	= 6; //  =
+var TOKEN_COMMENT   = 7; //  //
+var TOKEN_LBRACE	= 8; //  {
+var TOKEN_RBRACE	= 9; //  }
 
-var TOKEN_UNKNOWN	= 4;
-var TOKEN_EOL		= 5;//   ; end of line
-var TOKEN_ASSIGN	= 6;//   =
-var TOKEN_LPAREN	= 7;//   (
-var TOKEN_RPAREN	= 8;//   )
-var TOKEN_PLUS		= 9;//   +
-var TOKEN_MINUS		= 10;//  -
-var TOKEN_MULTI		= 11;//  *
-var TOKEN_DIVIDE	= 12;//  /
+var TOKEN_DELIMITER	= 10; 
+var TOKEN_UNKNOWN	= 11;
+var TOKEN_EOL		= 12; //  ; end of line
+var TOKEN_LPAREN	= 13; //  (
+var TOKEN_RPAREN	= 14; //  )
+var TOKEN_DIVIDE	= 15; //  /
+var TOKEN_MOD       = 16; //  %
 
-var TOKEN_COMMENT   = 13;//  #
-var TOKEN_LBRACE	= 14;//  {
-var TOKEN_RBRACE	= 15;//  }
-var TOKEN_PRINT     = 16;
-var TOKEN_EOE       = 17;
+var TOKEN_PRINT     = 17;
+var TOKEN_EOE       = 18;
 
 var TOKEN_EOL_KW     = ';';
-var TOKEN_COMMENT_KW = '#';
+var TOKEN_COMMENT_KW = '/';
 var TOKEN_PLUS_KW    = '+';
 var TOKEN_MINUS_KW   = '-';
 var TOKEN_MULTI_KW   = '*';
+var TOKEN_LBRACE_KW  = '{';
+var TOKEN_RBRACE_KW  = '}';
 
 // Type of Error
 var SYNTAX            = 100;
@@ -84,58 +87,95 @@ function Evaluate(args)
     var tempValue = 0;
     source_idx = 0;
     source_code = args;
-    stack = new Array();
+    stack = [];
+    sumStack = [];
+    isOpenedBrace = false;
     IsOccuredError = false;
     tokenType = TOKEN_NONE;
     gToken = TOKEN_NONE;
     var IsLineStart = true; 
-    var opeator = TOKEN_NONE;
+    var operator = TOKEN_PLUS;
     
     while(tokenType != TOKEN_EOE) {
+
+        // Get first TOKEN
         getToken();
 
-        switch(tokenType) {
+        // Define first TOKEN
+        // 숫자... =:: 수식 계산 및 출력 
+        // + / - / * =:: 사칙 연산 후 출력
+        // @변수=  =:: 수식 값 변수에 넣고 출력
+        // @변수 + =:: 수식 계산 후 출력
+        // {  } =:: 스크립트 수행
+        // ? := 출력
+        
+        TRACE("1st token: " + tokenType);
+        switch(tokenType) {                      
             case TOKEN_PLUS:
-                 opeator = TOKEN_PLUS;
+                 operator = TOKEN_PLUS;
                  break;
             case TOKEN_MINUS:
-                 opeator = TOKEN_MINUS;
+                 operator = TOKEN_MINUS;
                  break;
             case TOKEN_MULTI:
-                 opeator = TOKEN_MULTI;
-                 tempValue = 1;
+                 operator = TOKEN_MULTI;
                 break;
             case TOKEN_VARIABLE:
                 break;
             case TOKEN_NUMBER:
-                stack.push(gToken);
+                 stack.push(gToken);
+                 break;  
+            case TOKEN_ASSIGN:
+                break;     
+            case TOKEN_COMMENT:
                 break;
+            case TOKEN_LBRACE:
+                isOpenedBrace = true;
+                result += "{\n" 
+                break;
+            case TOKEN_RBRACE:
+                tempValue = 0;
+                while (sumStack.length > 0) {
+                    tempValue += parseInt(sumStack.pop());
+                };
+                result += "} " + tempValue + "\n";
+                isOpenedBrace = false;
+                break;    
             case TOKEN_EOE:
                 if (stack.length <= 0) break;
                 /* fall through */
             case TOKEN_EOL:
-                switch(opeator) {
-                    case TOKEN_NONE:
+                switch(operator) {
                     case TOKEN_PLUS:
+                        tempValue = 0;
                         while (stack.length > 0) {
                             tempValue += parseInt(stack.pop());
                         };
                         break;
                     case TOKEN_MINUS:
+                        tempValue = 0;
                         while (stack.length >= 2) {
                             tempValue += parseInt(stack.pop());
                         };
                         tempValue = parseInt(stack.pop()) - tempValue;
                         break;   
                     case TOKEN_MULTI:
+                        tempValue = 1;
                         while (stack.length > 0) {
                             tempValue *= parseInt(stack.pop());
                         };
                         break;
                 }
                 result += tempValue + "\n";
+                if ( isOpenedBrace ) {
+                    sumStack.push(tempValue);
+                }
                 tempValue = 0;
                 IsLineStart = true;
+                operator = TOKEN_PLUS;
+                break;   
+            case TOKEN_UNKNOWN:
+                TRACE("Err : Unknown Token");   
                 break;                
             default:
                 break;
@@ -207,8 +247,18 @@ function getToken()
                 case TOKEN_MULTI_KW:
                     ++source_idx;
                     tokenType = TOKEN_MULTI;  
-                    break;                    
+                    break;  
+                case TOKEN_LBRACE_KW:
+                    ++source_idx;
+                    tokenType = TOKEN_LBRACE;
+                    break;
+                case TOKEN_RBRACE_KW:
+                    ++source_idx;
+                    tokenType = TOKEN_RBRACE;
+                    break;
                 default:
+                    ++source_idx;
+                    tokenType = TOKEN_UNKNOWN;
                     break;   
             }
         }
@@ -233,7 +283,7 @@ function getToken()
 
 function isDelimiter ( ch )
 {
-	if ("+-/*=(){}#;".indexOf(ch) != -1)
+	if ("+-/*=(){}@;".indexOf(ch) != -1)
 	    return true;
     return false;
 }
@@ -250,7 +300,7 @@ function PrintError (str)
 {
 	if (DEBUG_PRINT == true)
     {
-	    alert(str);
+	    console.log(str);
     }
     else 
     {
