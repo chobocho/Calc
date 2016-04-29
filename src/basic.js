@@ -1,7 +1,7 @@
 /*
- * Simple Calculator 1.0
+ * Simple Calculator
  *    
- * Version : 0.1
+ * Version : 1.0
  * Update  : 2016. 4. 30
  *
  */
@@ -94,6 +94,7 @@ function Evaluate(args)
     gToken = TOKEN_NONE;
     var IsLineStart = true; 
     var operator = TOKEN_PLUS;
+    var tempCh = "";
     
     while(tokenType != TOKEN_EOE) {
 
@@ -122,15 +123,27 @@ function Evaluate(args)
                 break;
             case TOKEN_LBRACE:
                 isOpenedBrace = true;
+                sumStack.push('{');
                 result += "{\n" 
                 break;
             case TOKEN_RBRACE:
                 tempValue = 0;
                 while (sumStack.length > 0) {
-                    tempValue += parseInt(sumStack.pop());
+                    tempCh = sumStack.pop();
+                    if ( tempCh == '{') break;
+                    else { 
+                        tempValue += parseInt(tempCh);
+                    }
                 };
+
                 result += "} " + tempValue + "\n";
-                isOpenedBrace = false;
+ 
+                if (sumStack.length > 0 ) {
+                    sumStack.push(tempValue);
+                } else {
+                  isOpenedBrace = false;
+                }
+
                 break;    
             case TOKEN_EOE:
                 if (stack.length <= 0) break;
