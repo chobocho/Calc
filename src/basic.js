@@ -1,7 +1,7 @@
 /*************************************************
- *	
- *	JavaScript Interpreter 1.0
- *	
+ *    
+ *    JavaScript Interpreter 1.0
+ *    
  *************************************************/
 
 /*-----------------------------------------------*
@@ -12,23 +12,23 @@ var TRACE_PRINT = true;  // Trace Mode Option
  
  
 // Type of Token
-var TOKEN_NONE   	= 0;
-var TOKEN_PLUS		= 1; // +
-var TOKEN_MINUS		= 2; // -
-var TOKEN_MULTI		= 3; // *
-var TOKEN_VARIABLE 	= 4; // @[a-zA-Z0-9]*
-var TOKEN_NUMBER	= 5; // [0-9]+
-var TOKEN_ASSIGN	= 6; //  =
+var TOKEN_NONE      = 0;
+var TOKEN_PLUS      = 1; // +
+var TOKEN_MINUS     = 2; // -
+var TOKEN_MULTI     = 3; // *
+var TOKEN_VARIABLE  = 4; // @[a-zA-Z0-9]*
+var TOKEN_NUMBER    = 5; // [0-9]+
+var TOKEN_ASSIGN    = 6; //  =
 var TOKEN_COMMENT   = 7; //  //
-var TOKEN_LBRACE	= 8; //  {
-var TOKEN_RBRACE	= 9; //  }
+var TOKEN_LBRACE    = 8; //  {
+var TOKEN_RBRACE    = 9; //  }
 
-var TOKEN_DELIMITER	= 10; 
-var TOKEN_UNKNOWN	= 11;
-var TOKEN_EOL		= 12; //  ; end of line
-var TOKEN_LPAREN	= 13; //  (
-var TOKEN_RPAREN	= 14; //  )
-var TOKEN_DIVIDE	= 15; //  /
+var TOKEN_DELIMITER = 10; 
+var TOKEN_UNKNOWN   = 11;
+var TOKEN_EOL       = 12; //  ; end of line
+var TOKEN_LPAREN    = 13; //  (
+var TOKEN_RPAREN    = 14; //  )
+var TOKEN_DIVIDE    = 15; //  /
 var TOKEN_MOD       = 16; //  %
 
 var TOKEN_PRINT     = 17;
@@ -39,7 +39,7 @@ var TOKEN_COMMENT_KW = '/';
 var TOKEN_PLUS_KW    = '+';
 var TOKEN_MINUS_KW   = '-';
 var TOKEN_MULTI_KW   = '*';
-var TOKEN_LBRACE_KW  = '{';
+var TOKEN_LBRACE_KW  = '{'; 
 var TOKEN_RBRACE_KW  = '}';
 
 // Type of Error
@@ -51,13 +51,13 @@ var DIVIDE_BY_ZERO    = 103;
 
 // Type of End
 var EOE            = "\0"; 
-var ErrorMessage = "";
+var ErrorMessage   = "";
 var IsOccuredError = false;
 
-var source_code = "";
-var source_idx = 0;
-var gToken = "";
-var tokenType = 0;
+var source_code    = "";
+var source_idx     = 0;
+var gToken         = "";
+var tokenType      = 0;
 var stack;
 
 
@@ -66,15 +66,15 @@ var stack;
  *-----------------------------------------------*/
 function main(args) {
 
-	var Result = {};
-    	
-	Result = Evaluate(args);
+    var Result = {};
+        
+    Result = Evaluate(args);
 
-	if (IsOccuredError == true)
-	{
-		Result = ErrorMessage;
+    if (IsOccuredError == true)
+    {
+        Result = ErrorMessage;
     }    
-	return Result;
+    return Result;
 }
 
 /*-----------------------------------------------*
@@ -100,14 +100,6 @@ function Evaluate(args)
 
         // Get first TOKEN
         getToken();
-
-        // Define first TOKEN
-        // 숫자... =:: 수식 계산 및 출력 
-        // + / - / * =:: 사칙 연산 후 출력
-        // @변수=  =:: 수식 값 변수에 넣고 출력
-        // @변수 + =:: 수식 계산 후 출력
-        // {  } =:: 스크립트 수행
-        // ? := 출력
         
         TRACE("1st token: " + tokenType);
         switch(tokenType) {                      
@@ -194,8 +186,8 @@ function getToken()
     
     if ( source_idx >= source_code.length ) 
     {
-	    tokenType = TOKEN_EOE;
-	    return;
+        tokenType = TOKEN_EOE;
+        return;
     }   
      
     while (   ( source_idx < source_code.length ) && 
@@ -204,23 +196,23 @@ function getToken()
               ( !isDelimiter( source_code.charAt(source_idx) ) )  
     ) 
     {
-	    ++source_idx;
+        ++source_idx;
     }            
         
     if ( source_idx >= source_code.length ) 
     {
-	    tokenType = TOKEN_EOE;
-	    return;
+        tokenType = TOKEN_EOE;
+        return;
     }   
 
     if ( isDelimiter( source_code.charAt(source_idx) ) )
     {
-	    tokenType = TOKEN_DELIMITER;
+        tokenType = TOKEN_DELIMITER;
     }
  
     else if ( isDigit ( source_code.charAt(source_idx) ) )
     {
-	    tokenType = TOKEN_NUMBER;
+        tokenType = TOKEN_NUMBER;
     }   
     
     
@@ -267,13 +259,13 @@ function getToken()
             break;
         case TOKEN_NUMBER: 
         {
-        	while ( isDigit ( source_code.charAt(source_idx) ) )
-	        {
-		        gToken += source_code.charAt(source_idx);
-		        ++source_idx;
-		        if (source_idx >= source_code.length )
-		            break;
-	        }
+            while ( isDigit ( source_code.charAt(source_idx) ) )
+            {
+                gToken += source_code.charAt(source_idx);
+                ++source_idx;
+                if (source_idx >= source_code.length )
+                    break;
+            }
         }
             break;
         default:
@@ -283,29 +275,29 @@ function getToken()
 
 function isDelimiter ( ch )
 {
-	if ("+-/*=(){}@;".indexOf(ch) != -1)
-	    return true;
+    if ("+-/*=(){}@;".indexOf(ch) != -1)
+        return true;
     return false;
 }
 
 
 function isDigit ( ch )
 {
-	if ("0123456789".indexOf(ch) != -1)
-	    return true;
+    if ("0123456789".indexOf(ch) != -1)
+        return true;
     return false;
 }
 
 function PrintError (str)
 {
-	if (DEBUG_PRINT == true)
+    if (DEBUG_PRINT == true)
     {
-	    console.log(str);
+        console.log(str);
     }
     else 
     {
-	    tempStr = document.source_code.result_view.value;
-	    ErrorMessage = tempStr + "\n" + str;     
+        tempStr = document.source_code.result_view.value;
+        ErrorMessage = tempStr + "\n" + str;     
     }
     
     IsOccuredError = true;    
@@ -315,7 +307,7 @@ function TRACE (str)
 {
     if (TRACE_PRINT == true)
     {
-	    console.log(str);    
-    }	
+        console.log(str);    
+    }    
 }
 
