@@ -1,5 +1,4 @@
 #Simple Calculator#
---------------------
 
 ##1.Basic grammer##
 
