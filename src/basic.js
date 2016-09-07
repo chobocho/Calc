@@ -74,7 +74,7 @@ var source_idx        = 0;
 var gToken            = "";
 var tokenType         = 0;
 var stack;
-var dict              = { };            
+var dict              = [];            
 
 /*-----------------------------------------------*
  *  Main Function
@@ -82,7 +82,9 @@ var dict              = { };
 function main(args) {
 
     var Result = "";
-            
+     
+     TRACE(typeof(dict));
+     
     if ( args.charAt(0) == '{' ) {
         Result = Evaluate(args);
    
@@ -98,8 +100,8 @@ function main(args) {
             var token = tokens.shift();
             TRACE ("Start :");
             TRACE (token);
-            Result += lispEval(token);
-            Result += "\n";
+               var temp = lispEval(token); 
+            Result += temp + ((temp === "") ? "" : "\n");
             TRACE ("ANSWER :");
             TRACE (source_code);
         } while(source_code[0] != undefined);
@@ -113,23 +115,39 @@ function main(args) {
 }
 
 
+function makeTable(dic){
+
+}
+
 function lispEval(token) {
-    TRACE ("lispEval " + token[0]);
+    TRACE ("lispEval > " + token + " " + typeof(token));
+
+    if (typeof(token) === "string") {
+        return dict[token];
+    }
+
+    else if (typeof(token) !== "object") {
+          return token;
+     }
+     
+     else {
+          TRACE("ERROR");
+     }
 
     switch(token[0]) {
         case TOKEN_PLUS_KW:
             TRACE ("lispEval : " + TOKEN_PLUS_KW);
             token.shift();
-                var nextToken;
-            var ans = parseInt(lispEval(token.shift()));
-                nextToken = token.shift();
+                var ans = parseInt(lispEval(token.shift()));
+                var nextToken = token.shift();
                 do {        
                     var right = lispEval(nextToken);
-                        ans += parseInt(right);
-                        nextToken = token.shift();
-                        TRACE ("NextToken " + nextToken);
+                         
+                    ans += right;
+                    nextToken = token.shift();
+                    TRACE ("NextToken " + nextToken);
                 } while (nextToken != undefined);
-                TRACE (ans);
+                TRACE ("lispEval + " + ans);
                 return ans;
         break;
         
@@ -137,15 +155,15 @@ function lispEval(token) {
             TRACE ("lispEval : " + TOKEN_MINUS_KW);
             token.shift();
                 var nextToken;
-            var ans = parseInt(lispEval(token.shift()));
+                var ans = parseInt(lispEval(token.shift()));
                 nextToken = token.shift();
                 do {        
                     var right = lispEval(nextToken);
-                        ans -= parseInt(right);
-                        nextToken = token.shift();
-                        TRACE ("NextToken " + nextToken);
+                    ans -= right;
+                    nextToken = token.shift();
+                    TRACE ("NextToken " + nextToken);
                 } while (nextToken != undefined);
-                TRACE (ans);
+                TRACE ("lispEval - " + ans);
                 return ans;
         break;        
         
@@ -153,43 +171,60 @@ function lispEval(token) {
             TRACE ("lispEval : "+TOKEN_MULTI_KW);
                 token.shift();
                 var nextToken;
-            var ans = parseInt(lispEval(token.shift()));
+                var ans = parseInt(lispEval(token.shift()));
                 nextToken = token.shift();
                 do {        
                     var right = lispEval(nextToken);
-                        ans *= parseInt(right);
-                        nextToken = token.shift();
-                        TRACE ("NextToken " + nextToken);
+                    ans *= right;
+                    nextToken = token.shift();
+                    TRACE ("NextToken " + nextToken);
                 } while (nextToken != undefined);
-                TRACE (ans);
+                TRACE ("lispEval * " +ans);
                 return ans;
         break;
         
         case TOKEN_DEVIDE_KW:
             TRACE ("lispEval : " + TOKEN_DEVIDE_KW);
-                token.shift();
-                var nextToken;
+            token.shift();
+            var nextToken;
             var ans = parseInt(lispEval(token.shift()));
+            nextToken = token.shift();
+            do {        
+                var right = lispEval(nextToken);
+                ans /= right;
                 nextToken = token.shift();
-                do {        
-                    var right = lispEval(nextToken);
-                        ans /= parseInt(right);
-                        nextToken = token.shift();
-                        TRACE ("NextToken " + nextToken);
-                } while (nextToken != undefined);
-                ans = parseInt(ans);
-                TRACE (ans);
-                return ans;
+                TRACE ("NextToken " + nextToken);
+            } while (nextToken != undefined);
+            ans = parseInt(ans);
+            TRACE ("lispEval / " +ans);
+            return ans;
         break;                
         
+        case "define":
+            TRACE ("lispEval : DEFINE");
+            token.shift();
+            var nextToken = token.shift();
+            dict[nextToken] = token.shift();
+            break;
+            
+        case "lambda":
+            TRACE ("lispEval : LAMBDA");
+            token.shift();
+            var funcParam = token.shift();
+            var funcBody  = token.shift();
+            UpdateDict(funcParam)
+            return lispEval(funcBody);
 
+            break;
+        
         default:
             var ans = token;
-                TRACE (ans);
-                return ans;
-        break;
+            TRACE (ans);
+            return ans;
+            break;
     }
-        
+
+    return "";        
 }
 
 
@@ -219,8 +254,20 @@ function read_from_tokens(input, output) {
             break;
                 
         default:
-            output.push(token);
-                break;
+            var bIsDigit = true;
+            for (var i = 0; i < token.length; i++) {
+                if ( isDigit ( token.charAt(i) ) == false) {
+                    bIsDigit = false;
+                    break;
+                } 
+            }
+            if (bIsDigit) { 
+                TRACE ("Digit " + token);
+             output.push(parseInt(token));
+            } else {
+                output.push(token);
+            }
+            break;
     } 
 }
 
