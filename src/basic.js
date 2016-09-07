@@ -127,12 +127,8 @@ function lispEval(token) {
     }
 
     else if (typeof(token) !== "object") {
-          return token;
-     }
-     
-     else {
-          TRACE("ERROR");
-     }
+        return token;
+    }
 
     switch(token[0]) {
         case TOKEN_PLUS_KW:
@@ -140,10 +136,8 @@ function lispEval(token) {
             token.shift();
                 var ans = parseInt(lispEval(token.shift()));
                 var nextToken = token.shift();
-                do {        
-                    var right = lispEval(nextToken);
-                         
-                    ans += right;
+                do {                              
+                    ans += lispEval(nextToken); 
                     nextToken = token.shift();
                     TRACE ("NextToken " + nextToken);
                 } while (nextToken != undefined);
@@ -158,8 +152,7 @@ function lispEval(token) {
                 var ans = parseInt(lispEval(token.shift()));
                 nextToken = token.shift();
                 do {        
-                    var right = lispEval(nextToken);
-                    ans -= right;
+                    ans -= lispEval(nextToken);
                     nextToken = token.shift();
                     TRACE ("NextToken " + nextToken);
                 } while (nextToken != undefined);
@@ -174,8 +167,7 @@ function lispEval(token) {
                 var ans = parseInt(lispEval(token.shift()));
                 nextToken = token.shift();
                 do {        
-                    var right = lispEval(nextToken);
-                    ans *= right;
+                    ans *= lispEval(nextToken);
                     nextToken = token.shift();
                     TRACE ("NextToken " + nextToken);
                 } while (nextToken != undefined);
@@ -190,8 +182,7 @@ function lispEval(token) {
             var ans = parseInt(lispEval(token.shift()));
             nextToken = token.shift();
             do {        
-                var right = lispEval(nextToken);
-                ans /= right;
+                ans /= lispEval(nextToken);
                 nextToken = token.shift();
                 TRACE ("NextToken " + nextToken);
             } while (nextToken != undefined);
