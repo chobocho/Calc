@@ -2,13 +2,13 @@
  * Simple Calculator
  *    
  * Version : 1.0
- * Update  : 2016. 4. 30
+ * Update  : 2017. 3. 29
  *
  */
 
- // 2016. 9. 2 : Add code to support simple lisp 
- // 2016. 9. 3 : Add code to support divide  
- 
+ // 2016. 9. 2  : Add code to support simple lisp 
+ // 2016. 9. 3  : Add code to support divide  
+ // 2017. 3. 29 : Remove simple lisp code
 /*-----------------------------------------------*
  *  Global variables
  *-----------------------------------------------*/
@@ -83,183 +83,19 @@ function main(args) {
 
     var Result = "";
      
-     TRACE(typeof(dict));
-     
-    if ( args.charAt(0) == '{' ) {
-        Result = Evaluate(args);
-   
-    } else {
-        //Tokenize
-        source_code = args.replace(/\(/g, " ( ").replace(/\)/g, " ) ").trim().split(/\s+/);
-        TRACE(source_code);
-        tokens = [];
-    
-        do {
-            read_from_tokens(source_code, tokens);
-            TRACE(tokens);
-            var token = tokens.shift();
-            TRACE ("Start :");
-            TRACE (token);
-               var temp = lispEval(token); 
-            Result += temp + ((temp === "") ? "" : "\n");
-            TRACE ("ANSWER :");
-            TRACE (source_code);
-        } while(source_code[0] != undefined);
+    args = args.trim();
+ 
+    if ( args.charAt(0) != '{' ) {
+        args = '{' + args + '}';       
     }
-        
+
+    Result = Evaluate(args);
+    
     if (IsOccuredError == true)
     {
         Result = ErrorMessage;
     } 
     return Result;
-}
-
-
-function makeTable(dic){
-
-}
-
-function lispEval(token) {
-    TRACE ("lispEval > " + token + " " + typeof(token));
-
-    if (typeof(token) === "string") {
-        return dict[token];
-    }
-
-    else if (typeof(token) !== "object") {
-        return token;
-    }
-
-    switch(token[0]) {
-        case TOKEN_PLUS_KW:
-            TRACE ("lispEval : " + TOKEN_PLUS_KW);
-            token.shift();
-                var ans = parseInt(lispEval(token.shift()));
-                var nextToken = token.shift();
-                do {                              
-                    ans += lispEval(nextToken); 
-                    nextToken = token.shift();
-                    TRACE ("NextToken " + nextToken);
-                } while (nextToken != undefined);
-                TRACE ("lispEval + " + ans);
-                return ans;
-        break;
-        
-        case TOKEN_MINUS_KW:
-            TRACE ("lispEval : " + TOKEN_MINUS_KW);
-            token.shift();
-                var nextToken;
-                var ans = parseInt(lispEval(token.shift()));
-                nextToken = token.shift();
-                do {        
-                    ans -= lispEval(nextToken);
-                    nextToken = token.shift();
-                    TRACE ("NextToken " + nextToken);
-                } while (nextToken != undefined);
-                TRACE ("lispEval - " + ans);
-                return ans;
-        break;        
-        
-        case TOKEN_MULTI_KW:
-            TRACE ("lispEval : "+TOKEN_MULTI_KW);
-                token.shift();
-                var nextToken;
-                var ans = parseInt(lispEval(token.shift()));
-                nextToken = token.shift();
-                do {        
-                    ans *= lispEval(nextToken);
-                    nextToken = token.shift();
-                    TRACE ("NextToken " + nextToken);
-                } while (nextToken != undefined);
-                TRACE ("lispEval * " +ans);
-                return ans;
-        break;
-        
-        case TOKEN_DEVIDE_KW:
-            TRACE ("lispEval : " + TOKEN_DEVIDE_KW);
-            token.shift();
-            var nextToken;
-            var ans = parseInt(lispEval(token.shift()));
-            nextToken = token.shift();
-            do {        
-                ans /= lispEval(nextToken);
-                nextToken = token.shift();
-                TRACE ("NextToken " + nextToken);
-            } while (nextToken != undefined);
-            ans = parseInt(ans);
-            TRACE ("lispEval / " +ans);
-            return ans;
-        break;                
-        
-        case "define":
-            TRACE ("lispEval : DEFINE");
-            token.shift();
-            var nextToken = token.shift();
-            dict[nextToken] = token.shift();
-            break;
-            
-        case "lambda":
-            TRACE ("lispEval : LAMBDA");
-            token.shift();
-            var funcParam = token.shift();
-            var funcBody  = token.shift();
-            UpdateDict(funcParam)
-            return lispEval(funcBody);
-
-            break;
-        
-        default:
-            var ans = token;
-            TRACE (ans);
-            return ans;
-            break;
-    }
-
-    return "";        
-}
-
-
-function read_from_tokens(input, output) {
-    TRACE ("read_from_tokens");
-    
-    token = input.shift();
-    TRACE(token);
-                    
-    switch(token) {
-        case undefined:
-             output.pop();
-             TRACE("input is null");
-             break;
-
-        case TOKEN_LPAREN_SZ:
-                 var list = [];
-             while (input[0] != TOKEN_RPAREN_SZ) {
-                        read_from_tokens(input, list);
-                 }
-                 input.shift(); // Remove ')'
-                 output.push(list);
-             break;
-                        
-        case TOKEN_RPAREN_SZ:
-                onError("Error : Start with ')'!");
-            break;
-                
-        default:
-            var bIsDigit = true;
-            for (var i = 0; i < token.length; i++) {
-                if ( isDigit ( token.charAt(i) ) == false) {
-                    bIsDigit = false;
-                    break;
-                } 
-            }
-            if (bIsDigit) { 
-                TRACE ("Digit " + token);
-             output.push(parseInt(token));
-            } else {
-                output.push(token);
-            }
-            break;
-    } 
 }
 
 function onError(msg){
@@ -268,219 +104,47 @@ function onError(msg){
     TRACE(msg);
 }
 
-
-/*-----------------------------------------------*
- *  ?˜ì‹ ê³„ì‚° ë¶€ë¶?
- *-----------------------------------------------*/
-
+/**
+{
+100*20-10+4/2
+ÀÌÀÚ 9000000/18 + 10000-1000
+Åë½Åºñ 30000
+Áý¼¼ 900000
+¿ëµ· 100000 + 5000*30
+±âºÎ±Ý 100000+20000+5000
+ÀÌÀÚ + Åë½Åºñ + Áý¼¼ + ¿ëµ· + ±âºÎ±Ý
+}
+*/
 function Evaluate(args)
 {
     var result = "";
     var tempValue = 0;
-    source_idx = 0;
-    source_code = args;
+    var source_code =  args.replace(/{/g, '\n{\n').replace(/}/g, '\n}\n').split(/\n/g);
     stack = [];
     sumStack = [];
     isOpenedBrace = false;
     IsOccuredError = false;
-    tokenType = TOKEN_NONE;
-    gToken = TOKEN_NONE;
     var IsLineStart = true; 
-    var operator = TOKEN_PLUS;
     var tempCh = "";
-    
-    while(tokenType != TOKEN_EOE) {
 
-        // Get first TOKEN
-        getToken();
-        
-        TRACE("1st token: " + tokenType);
-        switch(tokenType) {                      
-            case TOKEN_PLUS:
-                 operator = TOKEN_PLUS;
-                 break;
-            case TOKEN_MINUS:
-                 operator = TOKEN_MINUS;
-                 break;
-            case TOKEN_MULTI:
-                 operator = TOKEN_MULTI;
-                break;
-            case TOKEN_VARIABLE:
-                break;
-            case TOKEN_NUMBER:
-                 stack.push(gToken);
-                 break;  
-            case TOKEN_ASSIGN:
-                break;     
-            case TOKEN_COMMENT:
-                break;
-            case TOKEN_LBRACE:
-                isOpenedBrace = true;
-                sumStack.push('{');
-                result += "{\n" 
-                break;
-            case TOKEN_RBRACE:
-                tempValue = 0;
-                while (sumStack.length > 0) {
-                    tempCh = sumStack.pop();
-                    if ( tempCh == '{') break;
-                    else { 
-                        tempValue += parseInt(tempCh);
-                    }
-                };
+    // Parsing and insert Stack
+    for (var i = 0; i < source_code.length; i++) {
+        var line = source_code[i].trim();
+        if (line == "") continue;
+        TRACE(line);
+        var exp = line.split(/\s+/g);
+        TRACE (exp);
+    }
+    // Evaluate code 
 
-                result += "} " + tempValue + "\n";
- 
-                if (sumStack.length > 0 ) {
-                    sumStack.push(tempValue);
-                } else {
-                  isOpenedBrace = false;
-                }
-
-                break;    
-            case TOKEN_EOE:
-                if (stack.length <= 0) break;
-                /* fall through */
-            case TOKEN_EOL:
-                switch(operator) {
-                    case TOKEN_PLUS:
-                        tempValue = 0;
-                        while (stack.length > 0) {
-                            tempValue += parseInt(stack.pop());
-                        };
-                        break;
-                    case TOKEN_MINUS:
-                        tempValue = 0;
-                        while (stack.length >= 2) {
-                            tempValue += parseInt(stack.pop());
-                        };
-                        tempValue = parseInt(stack.pop()) - tempValue;
-                        break;   
-                    case TOKEN_MULTI:
-                        tempValue = 1;
-                        while (stack.length > 0) {
-                            tempValue *= parseInt(stack.pop());
-                        };
-                        break;
-                }
-                result += tempValue + "\n";
-                if ( isOpenedBrace ) {
-                    sumStack.push(tempValue);
-                }
-                tempValue = 0;
-                IsLineStart = true;
-                operator = TOKEN_PLUS;
-                break;   
-            case TOKEN_UNKNOWN:
-                TRACE("Err : Unknown Token");   
-                break;                
-            default:
-                break;
-        }
-
-    };
     result += "\n- END -";
     return result;
 }
 
-function getToken()
-{
-    tokenType = TOKEN_NONE;
-    gToken = "";
-    
-    
-    if ( source_idx >= source_code.length ) 
-    {
-        tokenType = TOKEN_EOE;
-        return;
-    }   
-     
-    while (   ( source_idx < source_code.length ) && 
-              ( source_code.charAt(source_idx) != '@') && 
-              ( !isDigit( source_code.charAt(source_idx) ) )&&
-              ( !isDelimiter( source_code.charAt(source_idx) ) )  
-    ) 
-    {
-        ++source_idx;
-    }            
-        
-    if ( source_idx >= source_code.length ) 
-    {
-        tokenType = TOKEN_EOE;
-        return;
-    }   
-
-    if ( isDelimiter( source_code.charAt(source_idx) ) )
-    {
-        tokenType = TOKEN_DELIMITER;
-    }
- 
-    else if ( isDigit ( source_code.charAt(source_idx) ) )
-    {
-        tokenType = TOKEN_NUMBER;
-    }   
-    
-    
-    switch(tokenType) {
-        case TOKEN_DELIMITER:
-        {
-            switch(source_code.charAt(source_idx)) {
-                case TOKEN_EOL_KW:
-                    ++source_idx;
-                    tokenType = TOKEN_EOL;
-                    break;
-                case TOKEN_COMMENT_KW:
-                    ++source_idx;
-                    tokenType = TOKEN_COMMENT;
-                    break;
-                case TOKEN_PLUS_KW:
-                    ++source_idx;
-                    tokenType = TOKEN_PLUS;
-                    break;
-                case TOKEN_MINUS_KW:
-                    ++source_idx;
-                    tokenType = TOKEN_MINUS;
-                    break;
-                case TOKEN_MULTI_KW:
-                    ++source_idx;
-                    tokenType = TOKEN_MULTI;  
-                    break;  
-                case TOKEN_LBRACE_KW:
-                    ++source_idx;
-                    tokenType = TOKEN_LBRACE;
-                    break;
-                case TOKEN_RBRACE_KW:
-                    ++source_idx;
-                    tokenType = TOKEN_RBRACE;
-                    break;
-                default:
-                    ++source_idx;
-                    tokenType = TOKEN_UNKNOWN;
-                    break;   
-            }
-        }
-            break;
-        case TOKEN_VARIABLE:
-            break;
-        case TOKEN_NUMBER: 
-        {
-            while ( isDigit ( source_code.charAt(source_idx) ) )
-            {
-                gToken += source_code.charAt(source_idx);
-                ++source_idx;
-                if (source_idx >= source_code.length )
-                    break;
-            }
-        }
-            break;
-        default:
-            break;
-    }
-}
 
 function isDelimiter ( ch )
 {
-    if ("+-/*=(){}@;".indexOf(ch) != -1)
+    if ("+-/*=(){};".indexOf(ch) != -1)
         return true;
     return false;
 }
