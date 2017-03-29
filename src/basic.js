@@ -102,6 +102,13 @@ function Evaluate(args)
             var left = exp[0];
             var right = "";
 
+            if (exp.length >= 2) {
+                exp[1] = exp[1].trim();
+                if (exp[1][0] == '=') {
+                    exp[1] = exp[1].substring(1);
+                }
+            }
+
             for (var j = 1; j < exp.length; j++) {
                 right += exp[j];             
             }
