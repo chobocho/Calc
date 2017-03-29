@@ -7,11 +7,11 @@
 
 <script language="JavaScript">
 function Run(form) { 
-	form.result_view.value = main(form.source_view.value); 
+    form.result_view.value = main(form.source_view.value); 
 }
 
 function ClearForm(form) { 
-	form.result_view.value = "";
+    form.result_view.value = "";
     form.source_view.value = "";    
 }
 
@@ -27,10 +27,10 @@ function ClearForm(form) {
     <TABLE cellSpacing=0 borderColorDark=white align=center borderColorLight=black border=1>
         <TR>
             <TD align="center">
-            [ 마지막은 <b>;</b> 을 붙여주세요! (Input formula) ]
+            [ Input formula ]
             </TD>
             <TD align="center">
-            [ 결과 (Result) ]
+            [ Result]
             </TD>    
         </TR>
         <TR>
@@ -38,7 +38,7 @@ function ClearForm(form) {
                 <SPAN style="FONT-SIZE: 9pt"><TextArea name="source_view" cols="50" rows="20"></textArea> </SPAN>
             </TD>
             <TD width=80 height=40>
-                <SPAN style="FONT-SIZE: 9pt"><TextArea name="result_view" cols="20" rows="20"></textArea> </SPAN>
+                <SPAN style="FONT-SIZE: 9pt"><TextArea name="result_view" cols="50" rows="20"></textArea> </SPAN>
             </TD>
         </TR>
         <TR>
@@ -49,9 +49,10 @@ function ClearForm(form) {
         </TR>
         <TR>
             <TD width=240 colSpan=2>
-                Example<br>
-                1  2  3 ; => 6  (1  + 2  + 3 )<br>
-                10 20 30  => 60 (10 + 20 + 30)               
+                [Example]<br>
+                apple 100<br>
+                orange 200*10<br>
+                = apple + orage +10               
             </TD>
         </TR>        
         <TR>
