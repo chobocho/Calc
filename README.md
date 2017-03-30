@@ -1,28 +1,15 @@
-#Simple Calculator#
+# Simple Calculator #
 
-##1.Basic grammer##
+## 1.Basic grammer ##
 
-1) Get the sum of numbers  
+1) +. -. *. /  
+> 10+20*30/40
 
->`10 20 30;`  
+2) Comment is #
+> apple 100 # This is comment
 
-
-2) Get the multiply of numbers  
->`+ 10 20 30;`  
-
-
-3) Get the result 100-20-30  
->`- 100 20 30;`   
-
-
-4) Get the sum of block : { express; }    
->{    
->`- 100 20 30;`  
->`+ 100 20 30;`  
->}  
->Answer:  
->{  
->50    
->150    
->} `200`  
-
+3) Symbol    
+> apple  100     
+> orange 200  
+> fruit = apple * 10 + orange * 20
+> = fruit 
