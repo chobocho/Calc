@@ -10,6 +10,7 @@
  // 2016. 9. 3  : Add code to support divide  
  // 2017. 3. 29 : Remove simple lisp code
  // 2017. 3. 30 : Remove unused code
+ // 2017. 3. 31 : Fix bug
 /*-----------------------------------------------*
  *  Global variables
  *-----------------------------------------------*/
@@ -22,6 +23,8 @@ var IsOccuredError    = false;
 
 var source_code       = "";
 var dict              = {};            
+
+var COMMENT           = '#';
 
 /*-----------------------------------------------*
  *  Main Function
@@ -57,7 +60,6 @@ function Evaluate(args)
     var source_code =  args.replace(/{/g, '\n{\n').replace(/}/g, '\n}\n').split(/\n/g);
     IsOccuredError = false;
 
-    // Parsing and insert Stack
     for (var i = 0; i < source_code.length; i++) {
         var line = source_code[i].trim();
         if (line == "") continue;
@@ -66,9 +68,13 @@ function Evaluate(args)
         TRACE (exp);
 
         var ch = exp[0][0];
-        if (isDelimiter(ch) || isDigit(ch)) {
+
+        if (ch == COMMENT) {
+           // Ignore comment line
+        } else if (isDelimiter(ch) || isDigit(ch)) {
            var right = "";
            var tmpRight = "";
+           var startComment = -1;
 
            switch(ch) {
                case '=':
@@ -77,6 +83,8 @@ function Evaluate(args)
                    for (var j = 1; j < exp.length; j++) {
                        right += exp[j];             
                    }
+
+                   right = removeComment(right);
                    break;
                case '{':
                case '}':
@@ -91,12 +99,13 @@ function Evaluate(args)
            if (right != "") {
                tmpRight = right;
                
-               for (var k in dict) {
-                   if (right.search(k) != -1) {
-                       right = right.replace(k, dict[k]);
-                   }
+               right = replaceSymbol(right, dict);
+
+               try {
+                   result += eval(right) + " = " + tmpRight + "\n";
+               } catch (e) {
+                   result += "Error!\n\n" + right;
                }
-               result += eval(right) + " = " + tmpRight + "\n";
            }
         } else {
             var left = exp[0];
@@ -113,11 +122,8 @@ function Evaluate(args)
                 right += exp[j];             
             }
 
-            for (var k in dict) {
-                if (right.search(k) != -1) {
-                    right = right.replace(k, dict[k]);
-                }
-            }
+            right = removeComment(right);
+            right = replaceSymbol(right, dict);
  
             TRACE(right);   
             dict[left] = "(" + right + ")";
@@ -130,6 +136,23 @@ function Evaluate(args)
     return result;
 }
 
+function removeComment(source_) {
+     var startComment = source_.indexOf(COMMENT);
+
+     if (startComment != -1) {
+         source_ = source_.substring(0, startComment);
+     }
+     return source_;
+}
+
+function replaceSymbol(source_, dict_) {
+     for (var k in dict_) {
+         if (source_.search(k) != -1) {
+             source_ = source_.replace(new RegExp(k, 'g'), dict_[k]);
+         }
+     }
+     return source_;
+}
 
 function isDelimiter ( ch )
 {
