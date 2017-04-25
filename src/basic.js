@@ -2,7 +2,7 @@
  * Simple Calculator
  *    
  * Version : 1.0
- * Update  : 2017. 3. 29
+ * Update  : 2017. 4. 26
  *
  */
 
@@ -11,6 +11,7 @@
  // 2017. 3. 29 : Remove simple lisp code
  // 2017. 3. 30 : Remove unused code
  // 2017. 3. 31 : Fix bug
+ // 2017. 4. 26 : Add code to sum
 /*-----------------------------------------------*
  *  Global variables
  *-----------------------------------------------*/
@@ -57,8 +58,11 @@ function onError(msg){
 function Evaluate(args)
 {
     var result = "";
+    var sumStack = [];
+    var sumIdx = -1;
     var source_code =  args.replace(/{/g, '\n{\n').replace(/}/g, '\n}\n').split(/\n/g);
     IsOccuredError = false;
+
 
     for (var i = 0; i < source_code.length; i++) {
         var line = source_code[i].trim();
@@ -87,7 +91,10 @@ function Evaluate(args)
                    right = removeComment(right);
                    break;
                case '{':
+                   sumStack[++sumIdx] = 0;
+                   break; 
                case '}':
+                   --sumIdx;
                    break;
                default:
                    for (var j = 0; j < exp.length; j++) {
@@ -102,10 +109,14 @@ function Evaluate(args)
                right = replaceSymbol(right, dict);
 
                try {
-                   result += eval(right) + " = " + tmpRight + "\n";
+                   var tmp = eval(right);
+                   result += tmp + " = " + tmpRight + "\n";
+                   sumStack[sumIdx] += tmp;
                } catch (e) {
                    result += "Error!\n\n" + right;
                }
+           } else if(ch == '=' && right == "") {
+                   result += "Sum = " + sumStack[sumIdx] + "\n";  
            }
         } else {
             var left = exp[0];
@@ -127,6 +138,7 @@ function Evaluate(args)
  
             TRACE(right);   
             dict[left] = "(" + right + ")";
+            sumStack[sumIdx] += eval(right);
             //result += eval(right) + "\n";
         }
 
