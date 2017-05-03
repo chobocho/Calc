@@ -2,16 +2,18 @@
  * Simple Calculator
  *    
  * Version : 1.0
- * Update  : 2017. 4. 26
+ * Update  : 2017. 5. 3
  *
  */
 
- // 2016. 9. 2  : Add code to support simple lisp 
- // 2016. 9. 3  : Add code to support divide  
- // 2017. 3. 29 : Remove simple lisp code
- // 2017. 3. 30 : Remove unused code
- // 2017. 3. 31 : Fix bug
- // 2017. 4. 26 : Add code to sum
+// 2016. 9. 2  : Add code to support simple lisp 
+// 2016. 9. 3  : Add code to support divide  
+// 2017. 3. 29 : Remove simple lisp code
+// 2017. 3. 30 : Remove unused code
+// 2017. 3. 31 : Fix bug
+// 2017. 4. 26 : Add code to sum
+// 2017. 5. 3  : Add code to support a varable starting with number
+
 /*-----------------------------------------------*
  *  Global variables
  *-----------------------------------------------*/
@@ -75,7 +77,7 @@ function Evaluate(args)
 
         if (ch == COMMENT) {
            // Ignore comment line
-        } else if (isDelimiter(ch) || isDigit(ch)) {
+        } else if (isDelimiter(ch) || !isValue(exp[0])) {
            var right = "";
            var tmpRight = "";
            var startComment = -1;
@@ -173,6 +175,16 @@ function isDelimiter ( ch )
     return false;
 }
 
+
+function isValue ( str )
+{
+    for (var i = 0; i < str.length; i++) {
+        if (!isDigit(str[i])) {
+            return true;
+        } 
+    }
+    return false;
+}
 
 function isDigit ( ch )
 {
